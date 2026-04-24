@@ -90,7 +90,7 @@ export default function WastePage() {
       uploadFd.append("file", file);
 
       const [mlRes, uploadRes] = await Promise.all([
-        fetch(`${API}/detect/waste`, { method: "POST", body: mlFd, signal: controller.signal }),
+        fetch(`${API}/detect/waste`, { method: "POST", body: mlFd, signal: controller.signal, credentials: "omit" }),
         fetch("/api/upload", { method: "POST", body: uploadFd, signal: controller.signal }),
       ]);
 
@@ -230,11 +230,27 @@ export default function WastePage() {
             {/* Viewer header */}
             <div className="px-5 py-3.5 border-b border-image-frame flex justify-between items-center bg-surface-low">
               <h1 className="text-[20px] font-bold text-foreground uppercase tracking-tight">{scanId}</h1>
-              {location && (
-                <span className="text-[10px] text-mint-fg font-mono bg-canvas px-3 py-1 rounded-[20px] border border-image-frame">
-                  {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
-                </span>
-              )}
+              <div className="flex items-center gap-3">
+                {location && (
+                  <span className="text-[10px] text-mint-fg font-mono bg-canvas px-3 py-1 rounded-[20px] border border-image-frame">
+                    {location.lat.toFixed(5)}, {location.lng.toFixed(5)}
+                  </span>
+                )}
+                {imageUrl && !result && !loading && (
+                  <button
+                    onClick={onDetect}
+                    className="bg-ultraviolet text-white text-[11px] font-bold uppercase tracking-[0.15em] px-4 py-2 rounded-[20px] hover:bg-foreground hover:text-canvas transition-colors"
+                  >
+                    Run Detection
+                  </button>
+                )}
+                {loading && (
+                  <div className="text-[11px] text-mint-fg uppercase tracking-[1.5px] flex items-center gap-2 animate-pulse">
+                    <Cpu className="h-3.5 w-3.5" />
+                    {warmingUp ? "Warming up…" : "Analysing…"}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Detection summary badge */}
@@ -272,15 +288,18 @@ export default function WastePage() {
                   <div className="absolute inset-0 border border-ultraviolet/30 pointer-events-none" />
                 </div>
               ) : (
-                <label className="flex flex-col items-center gap-4 cursor-pointer p-12 text-center border-2 border-dashed border-image-frame rounded-[20px] hover:border-ultraviolet/50 transition-colors">
-                  <div className="w-14 h-14 rounded-full bg-ultraviolet/10 border border-ultraviolet/30 flex items-center justify-center">
-                    <Upload className="h-6 w-6 text-ultraviolet" />
+                <label className="flex flex-col items-center gap-5 cursor-pointer p-12 text-center border-2 border-dashed border-image-frame rounded-[20px] hover:border-ultraviolet/50 transition-colors group">
+                  <div className="w-16 h-16 rounded-full bg-ultraviolet/10 border border-ultraviolet/30 flex items-center justify-center group-hover:bg-ultraviolet/20 transition-colors">
+                    <Upload className="h-7 w-7 text-ultraviolet" />
                   </div>
                   <div>
                     <div className="text-[13px] font-bold text-foreground uppercase tracking-[1.5px] mb-1">
                       Upload waste scan image
                     </div>
-                    <div className="text-[11px] text-secondary-text">JPG, PNG, WEBP supported</div>
+                    <div className="text-[11px] text-secondary-text mb-4">JPG, PNG, WEBP · Max 10 MB</div>
+                    <span className="bg-ultraviolet text-white text-[11px] font-bold uppercase tracking-[0.15em] px-5 py-2.5 rounded-[20px] group-hover:bg-foreground transition-colors">
+                      Choose File
+                    </span>
                   </div>
                   <input type="file" accept="image/*" className="sr-only" onChange={onPick} />
                 </label>

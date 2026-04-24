@@ -80,7 +80,7 @@ export default function RoadsPage() {
       uploadFd.append("file", file);
 
       const [mlRes, uploadRes] = await Promise.all([
-        fetch(`${API}/detect/road`, { method: "POST", body: mlFd, signal: controller.signal }),
+        fetch(`${API}/detect/road`, { method: "POST", body: mlFd, signal: controller.signal, credentials: "omit" }),
         fetch("/api/upload", { method: "POST", body: uploadFd, signal: controller.signal }),
       ]);
 

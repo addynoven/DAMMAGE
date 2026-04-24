@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
   const db = client.db("dammage");
 
   const caller = await db.collection<UserDoc>("users").findOne({
-    _id: new ObjectId(session.user.id),
+    email: session.user.email,
   });
 
   if (caller?.role !== "admin") {
